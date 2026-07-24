@@ -1,0 +1,142 @@
+local Config = {}
+
+local path = "/boot/config.lua"
+
+
+-- ======================================
+-- Valeurs par défaut
+-- ======================================
+
+local default = {
+    title = "NyxLoader",
+
+    -- Temps avant boot automatique
+    timeout = 10,
+
+    -- Couleur du menu
+    bootColor = colors.blue,
+
+    -- Secure Boot actif
+    secureBoot = false
+}
+
+
+
+-- ======================================
+-- Chargement
+-- ======================================
+
+function Config.load()
+
+    local config = {}
+
+
+    if fs.exists(path) then
+
+        local ok, result = pcall(
+            dofile,
+            path
+        )
+
+
+        if ok and type(result) == "table" then
+
+            config = result
+
+        end
+
+    end
+
+
+
+    -- Complète les valeurs manquantes
+
+    for key, value in pairs(default) do
+
+        if config[key] == nil then
+
+            config[key] = value
+
+        end
+
+    end
+
+
+    return config
+
+end
+
+
+
+-- ======================================
+-- Sauvegarde
+-- ======================================
+
+function Config.save(config)
+
+
+    local file = fs.open(
+        path,
+        "w"
+    )
+
+
+    file.write(
+        "return {\n"
+    )
+
+
+    file.write(
+        "    title = \""
+        .. config.title
+        .. "\",\n"
+    )
+
+
+    file.write(
+        "    timeout = "
+        .. tostring(config.timeout)
+        .. ",\n"
+    )
+
+
+    file.write(
+        "    bootColor = "
+        .. tostring(config.bootColor)
+        .. ",\n"
+    )
+
+
+    file.write(
+        "    secureBoot = "
+        .. tostring(config.secureBoot)
+        .. "\n"
+    )
+
+
+    file.write(
+        "}\n"
+    )
+
+
+    file.close()
+
+end
+
+
+
+-- ======================================
+-- Reset configuration
+-- ======================================
+
+function Config.reset()
+
+    if fs.exists(path) then
+        fs.delete(path)
+    end
+
+end
+
+
+
+return Config

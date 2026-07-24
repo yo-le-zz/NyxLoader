@@ -1,13 +1,14 @@
 local Scanner = {}
 
 
+
 -- ======================================
 -- Lecture boot.json
 -- ======================================
 
 local function readBootFile(path)
 
-    local file = fs.open(path, "r")
+    local file = fs.open(path,"r")
 
     if not file then
         return nil
@@ -19,10 +20,12 @@ local function readBootFile(path)
     file.close()
 
 
-    local ok, json = pcall(
-        textutils.unserializeJSON,
-        data
-    )
+
+    local ok,json =
+        pcall(
+            textutils.unserializeJSON,
+            data
+        )
 
 
     if not ok or not json then
@@ -30,9 +33,14 @@ local function readBootFile(path)
     end
 
 
-    if not json.name or not json.file then
+
+    if not json.name
+    or not json.file then
+
         return nil
+
     end
+
 
 
     return json
@@ -41,120 +49,203 @@ end
 
 
 
+
+
 -- ======================================
 -- Scan récursif
 -- ======================================
 
+local ignored = {
+
+    ["rom"] = true,
+    [".git"] = true,
+    ["node_modules"] = true
+
+}
+
+
+
 local function scanDirectory(
     path,
-    result
+    result,
+    found
 )
 
-    result = result or {}
+
+    for _,name in ipairs(fs.list(path)) do
 
 
-    for _, name in ipairs(fs.list(path)) do
+        local full =
+            fs.combine(
+                path,
+                name
+            )
 
-        local full = fs.combine(
-            path,
-            name
-        )
 
 
         if fs.isDir(full) then
 
-            -- éviter les dossiers inutiles
-            if name ~= "rom" then
+
+            if not ignored[name] then
+
 
                 scanDirectory(
                     full,
-                    result
+                    result,
+                    found
                 )
+
 
             end
 
 
-        else
 
-            if name == "boot.json" then
-
-
-                local boot =
-                    readBootFile(full)
+        elseif name == "boot.json" then
 
 
-                if boot then
+
+            local boot =
+                readBootFile(full)
+
+
+
+            if boot then
+
+
+
+                local osPath =
+                    fs.getDir(full)
+
+
+
+                local id =
+                    boot.id
+                    or (
+                        boot.name
+                        .. ":"
+                        .. boot.file
+                    )
+
+
+
+                -- Anti doublon
+
+                if not found[id] then
+
+
+                    found[id] = true
+
 
 
                     table.insert(
                         result,
                         {
+
                             name = boot.name,
-                            file = fs.combine(
-                                fs.getDir(full),
-                                boot.file
-                            ),
-                            location = path
+
+
+                            file =
+                                fs.combine(
+                                    osPath,
+                                    boot.file
+                                ),
+
+
+                            location =
+                                osPath,
+
+
+                            id =
+                                id,
+
+
+                            icon =
+                                boot.icon,
+
+
+                            color =
+                                boot.color
+
                         }
                     )
 
 
                 end
 
+
             end
+
 
         end
 
+
     end
 
-
-    return result
 
 end
 
 
 
+
+
 -- ======================================
--- Recherche des disques
+-- Racines disponibles
 -- ======================================
 
 local function getRoots()
 
+
     local roots = {
+
         "/"
+
     }
 
 
-    for _, side in ipairs(peripheral.getNames()) do
 
-        if peripheral.getType(side)
+    for _,name in ipairs(
+        peripheral.getNames()
+    ) do
+
+
+
+        if peripheral.getType(name)
             == "drive" then
+
 
 
             local mount =
                 peripheral.call(
-                    side,
+                    name,
                     "getMountPath"
                 )
 
 
+
             if mount then
+
 
                 table.insert(
                     roots,
                     mount
                 )
 
+
             end
+
 
         end
 
+
     end
+
 
 
     return roots
 
 end
+
+
 
 
 
@@ -169,9 +260,14 @@ function Scanner.scan()
 
     local scanned = {}
 
+    local found = {}
 
 
-    for _, root in ipairs(getRoots()) do
+
+    for _,root in ipairs(
+        getRoots()
+    ) do
+
 
 
         if not scanned[root] then
@@ -180,26 +276,44 @@ function Scanner.scan()
             scanned[root] = true
 
 
+
             scanDirectory(
                 root,
-                systems
+                systems,
+                found
             )
 
 
         end
 
+
     end
 
 
 
-    -- Ajout du shell secours
+
+
+    -- Shell secours
 
     table.insert(
         systems,
         {
-            name = "CraftOS Shell",
-            file = "/rom/startup.lua",
-            location = "internal"
+
+            name =
+                "CraftOS Shell",
+
+
+            file =
+                "/rom/programs/shell.lua",
+
+
+            location =
+                "internal",
+
+
+            id =
+                "craftos"
+
         }
     )
 

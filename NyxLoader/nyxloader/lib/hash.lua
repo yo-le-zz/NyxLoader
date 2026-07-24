@@ -55,16 +55,19 @@ end
 function Hash.generate(data)
 
     if not crypto then
-        error(
-            "Cryptographic Accelerator unavailable"
-        )
+        error("Cryptographic Accelerator unavailable")
     end
 
 
-    return crypto.hash(
-        "sha256",
-        data
-    )
+    if crypto.sha256 then
+        return crypto.sha256(data)
+
+    elseif crypto.sha512 then
+        return crypto.sha512(data)
+
+    else
+        error("No supported hash function found")
+    end
 
 end
 
@@ -149,52 +152,37 @@ end
 function Hash.directory(path)
 
     if not fs.exists(path) then
-
-        error(
-            "Directory not found: "..path
-        )
-
+        error("Directory not found: "..path)
     end
-
 
 
     local files = listFiles(path)
 
-
     table.sort(files)
-
 
     local buffer = ""
 
 
     for _, filePath in ipairs(files) do
 
-
-        local file = fs.open(
-            filePath,
-            "r"
-        )
-
+        local file = fs.open(filePath, "r")
 
         local content = file.readAll()
 
         file.close()
 
 
+        -- chemin relatif uniquement
+        local relative = filePath:sub(#path + 2)
 
-        -- On ajoute le chemin pour éviter
-        -- que deux fichiers identiques
-        -- donnent le même résultat
 
         buffer = buffer
-            .. filePath
+            .. relative
             .. "\n"
             .. content
             .. "\n"
 
-
     end
-
 
 
     return Hash.generate(buffer)

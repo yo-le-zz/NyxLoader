@@ -1,4 +1,4 @@
-local basalt = require("lib/basalt")
+local basalt = dofile("/boot/nyxloader/lib/basalt.lua")
 
 
 local ui = {}

@@ -30,6 +30,7 @@ local ui = load("ui.lua")
 local hash = load("lib/hash.lua")
 local scanner = load("lib/scanner.lua")
 local configManager = load("config.lua")
+local uninstaller = load("lib/uninstall.lua")
 
 
 -- ======================================
@@ -57,17 +58,7 @@ config.bootColor = config.bootColor or colors.blue
 
 local function saveConfig()
 
-    local file = fs.open("/boot/config.lua", "w")
-
-    file.write(
-[[return {
-    title = "]] .. config.title .. [[",
-    timeout = ]] .. config.timeout .. [[,
-    secureBoot = ]] .. tostring(config.secureBoot) .. [[
-}]]
-    )
-
-    file.close()
+    configManager.save(config)
 
 end
 
@@ -259,18 +250,55 @@ end
 local function bootSystem(system)
 
 
+    -- Désinstaller NyxLoader (entrée spéciale du menu)
+
+    if system.id == "uninstall" then
+
+
+        local choice = ui.warning(
+            "DESINSTALLER NYXLOADER\n\n" ..
+            "Cette action est irreversible.",
+            {
+                "Confirmer",
+                "Annuler"
+            }
+        )
+
+
+        if choice ~= 1 then
+            return false
+        end
+
+
+        term.setBackgroundColor(colors.black)
+        term.setTextColor(colors.white)
+        term.clear()
+        term.setCursorPos(2,2)
+        print("Desinstallation de NyxLoader...")
+        print("")
+
+        uninstaller.run(print)
+
+        print("")
+        print("Redemarrage...")
+
+        sleep(1)
+        os.reboot()
+
+        return false
+
+    end
+
+
+
     -- Vérification fichier
 
     if not fs.exists(system.file) then
 
 
-        ui.warning(
-            "Erreur de boot\n\n" ..
+        ui.error(
             "Fichier introuvable :\n" ..
-            system.file,
-            {
-                "Retour NyxLoader"
-            }
+            system.file
         )
 
 
@@ -285,13 +313,37 @@ local function bootSystem(system)
 
     if system.id == "craftos" then
 
+        -- Si NyxLoader affichait sur un écran externe, on repasse
+        -- sur le terminal natif de l'ordinateur avant de lancer le
+        -- vrai shell CraftOS (sinon on tape "à l'aveugle").
+
+        local previousTerm = term.current()
+
+        if monitor then
+            term.redirect(term.native())
+        end
+
         term.clear()
         term.setCursorPos(1,1)
 
-        os.run(
+        local ok, err = pcall(
+            os.run,
             {},
             "/rom/programs/shell.lua"
         )
+
+        term.redirect(previousTerm)
+
+        if not ok then
+
+            ui.error(
+                "Le CraftOS Shell a plante\n\n" ..
+                tostring(err)
+            )
+
+            return false
+
+        end
 
         return true
 
@@ -303,6 +355,8 @@ local function bootSystem(system)
 
     -- OS normal
 
+
+    ui.splash(system, config)
 
     term.clear()
     term.setCursorPos(1,1)
@@ -327,12 +381,9 @@ local function bootSystem(system)
     if not ok then
 
 
-        ui.warning(
+        ui.error(
             "Crash de l'OS\n\n" ..
-            tostring(err),
-            {
-                "Retour NyxLoader"
-            }
+            tostring(err)
         )
 
 

@@ -23,6 +23,29 @@ local default = {
 
 
 -- ======================================
+-- Valeurs par défaut (copie)
+-- ======================================
+
+-- nyxloader.lua appelle configManager.default() quand
+-- /boot/config.lua n'existe pas encore : on renvoie une
+-- copie de la table par défaut (jamais la table originale,
+-- pour éviter de la modifier par accident).
+
+function Config.default()
+
+    local config = {}
+
+    for key, value in pairs(default) do
+        config[key] = value
+    end
+
+    return config
+
+end
+
+
+
+-- ======================================
 -- Chargement
 -- ======================================
 

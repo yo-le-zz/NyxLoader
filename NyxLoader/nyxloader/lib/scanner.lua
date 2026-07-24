@@ -3,6 +3,50 @@ local Scanner = {}
 
 
 -- ======================================
+-- Couleurs nommées (pour boot.json)
+-- ======================================
+
+-- boot.json est du JSON : il ne peut pas contenir directement
+-- colors.cyan etc. On accepte donc un nom de couleur en texte
+-- ("cyan", "red", ...) et on le convertit ici.
+
+local colorNames = {
+
+    white      = colors.white,
+    orange     = colors.orange,
+    magenta    = colors.magenta,
+    lightBlue  = colors.lightBlue,
+    yellow     = colors.yellow,
+    lime       = colors.lime,
+    pink       = colors.pink,
+    gray       = colors.gray,
+    grey       = colors.gray,
+    lightGray  = colors.lightGray,
+    lightGrey  = colors.lightGray,
+    cyan       = colors.cyan,
+    purple     = colors.purple,
+    blue       = colors.blue,
+    brown      = colors.brown,
+    green      = colors.green,
+    red        = colors.red,
+    black      = colors.black
+
+}
+
+
+local function resolveColor(name)
+
+    if type(name) ~= "string" then
+        return nil
+    end
+
+    return colorNames[name]
+
+end
+
+
+
+-- ======================================
 -- Lecture boot.json
 -- ======================================
 
@@ -160,11 +204,18 @@ local function scanDirectory(
 
 
                             icon =
-                                boot.icon,
+                                boot.icon
+                                and fs.combine(
+                                    osPath,
+                                    boot.icon
+                                )
+                                or nil,
 
 
                             color =
-                                boot.color
+                                resolveColor(
+                                    boot.color
+                                )
 
                         }
                     )
@@ -313,6 +364,28 @@ function Scanner.scan()
 
             id =
                 "craftos"
+
+        }
+    )
+
+
+
+    -- Désinstaller NyxLoader
+
+    table.insert(
+        systems,
+        {
+
+            name =
+                "Desinstaller NyxLoader",
+
+
+            location =
+                "internal",
+
+
+            id =
+                "uninstall"
 
         }
     )

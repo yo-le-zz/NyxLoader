@@ -98,6 +98,10 @@ local files = {
 
     "NyxLoader/nyxloader/lib/scanner.lua",
 
+    "NyxLoader/nyxloader/lib/loader.lua",
+
+    "NyxLoader/nyxloader/lib/uninstall.lua",
+
 }
 
 

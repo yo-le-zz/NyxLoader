@@ -15,6 +15,9 @@ Il permet de démarrer plusieurs systèmes CC:Tweaked avec une interface graphiq
 - 🔎 Recherche automatique des fichiers `boot.json`
 - 🌐 Installation depuis GitHub
 - 📦 Installation depuis un disque
+- 🗑️ Désinstallation propre (disque, GitHub, ou depuis le menu de boot)
+- 🖼️ Splash screen avec logo par OS (`icon` dans `boot.json`)
+- 🎨 Couleur de menu personnalisable par OS (`color` dans `boot.json`)
 - 🖼️ Support des écrans externes
 - ⏱️ Timeout configurable
 - 🔐 Secure Boot avec Cryptographic Accelerator (Classic Peripherals)
@@ -87,6 +90,32 @@ L'installation va :
 
 ---
 
+# 🗑️ Désinstallation
+
+## 💽 Depuis un disque
+
+Copiez `uninstall.lua` à la racine du disque, puis lancez :
+
+```lua
+uninstall.lua
+```
+
+## 🌐 Depuis GitHub
+
+```lua
+wget run https://raw.githubusercontent.com/yo-le-zz/NyxLoader/main/webuninstall.lua
+```
+
+Dans les deux cas, après confirmation, l'installateur supprime :
+
+- `/boot/nyxloader`
+- `/boot/config.lua`
+- `/boot/secureboot.hash`
+- `/startup.lua` (uniquement s'il appartient à NyxLoader — un
+  `startup.lua` personnalisé n'est jamais touché)
+
+---
+
 # 🔐 Secure Boot
 
 NyxLoader possède un système de vérification d'intégrité du bootloader.
@@ -142,7 +171,9 @@ Exemple :
 ```json
 {
     "name": "Mon OS",
-    "file": "/boot/start.lua"
+    "file": "/boot/start.lua",
+    "icon": "logo.nfp",
+    "color": "cyan"
 }
 ```
 
@@ -150,6 +181,28 @@ Exemple :
 
 - `name` : nom affiché dans le menu NyxLoader
 - `file` : fichier Lua exécuté pour démarrer l'OS
+- `icon` *(optionnel)* : chemin vers une image `.nfp` (format
+  `paintutils`), relatif au dossier du `boot.json`. Si elle est
+  présente, un splash screen affiche cette image centrée à l'écran
+  (ajustée à la taille de l'écran) juste avant de démarrer l'OS.
+- `color` *(optionnel)* : nom d'une couleur CC:Tweaked (`white`,
+  `orange`, `magenta`, `lightBlue`, `yellow`, `lime`, `pink`, `gray`,
+  `lightGray`, `cyan`, `purple`, `blue`, `brown`, `green`, `red`,
+  `black`). Utilisée pour surligner l'OS dans le menu quand il est
+  sélectionné.
+
+---
+
+## 🧪 OS d'exemple
+
+Le dossier [`examples/NyxTestOS`](examples/NyxTestOS) contient un OS
+minimal (`NyxTestOS`) qui ne sert qu'à tester NyxLoader : détection,
+splash screen avec logo, démarrage, et retour au menu. Il inclut un
+`boot.json` avec `icon` et `color` déjà configurés.
+
+Pour l'essayer : copiez le dossier `NyxTestOS` à la racine d'un
+disque (ou dans `/`) déjà équipé de NyxLoader. Il sera détecté
+automatiquement au prochain démarrage.
 
 ---
 
@@ -227,6 +280,21 @@ Active la vérification cryptographique.
 NyxLoader
 │
 ├── install.lua
+│   💽 Installateur (depuis un disque)
+│
+├── uninstall.lua
+│   🗑️ Désinstallateur (depuis un disque)
+│
+├── webinstall.lua
+│   🌐 Installateur (depuis GitHub)
+│
+├── webuninstall.lua
+│   🌐 Désinstallateur (depuis GitHub)
+│
+├── examples
+│   │
+│   └── NyxTestOS
+│       🧪 OS d'exemple pour tester NyxLoader
 │
 └── nyxloader
     │
@@ -243,6 +311,12 @@ NyxLoader
         │
         ├── basalt.lua
         │   🎨 Librairie UI
+        │
+        ├── loader.lua
+        │   📦 Chargeur de modules / API shell minimale
+        │
+        ├── uninstall.lua
+        │   🗑️ Désinstallation (utilisé par le menu de boot)
         │
         ├── hash.lua
         │   🔐 Fonctions de hash

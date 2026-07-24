@@ -1,0 +1,6 @@
+{
+    "name": "NyxTestOS",
+    "file": "/boot/start.lua",
+    "icon": "logo.nfp",
+    "color": "cyan"
+}

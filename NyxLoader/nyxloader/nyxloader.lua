@@ -27,7 +27,7 @@ end
 local ui = load("ui.lua")
 local hash = load("lib/hash.lua")
 local scanner = load("lib/scanner.lua")
-local configManager = require("config")
+local configManager = load("config.lua")
 
 
 

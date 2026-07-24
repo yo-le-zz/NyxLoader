@@ -1,4 +1,5 @@
 local BASE = "/boot/nyxloader"
+_G.NYXLOADER_PATH = "/boot/nyxloader"
 
 package.path = BASE .. "/?.lua;" .. BASE .. "/?/init.lua;" .. package.path
 
@@ -23,12 +24,12 @@ local function load(path)
     return dofile(BASE .. "/" .. path)
 end
 
+load("lib/loader.lua")
 
 local ui = load("ui.lua")
 local hash = load("lib/hash.lua")
 local scanner = load("lib/scanner.lua")
-local configManager = require("config")
-
+local configManager = load("config.lua")
 
 
 -- ======================================
@@ -39,13 +40,15 @@ local config = {}
 
 if fs.exists("/boot/config.lua") then
     config = configManager.load()
+else
+    config = configManager.default()
 end
 
 
 config.title = config.title or "NyxLoader"
 config.timeout = config.timeout or 10
 config.secureBoot = config.secureBoot or false
-
+config.bootColor = config.bootColor or colors.blue
 
 
 -- ======================================
@@ -191,7 +194,6 @@ local function secureBootCheck()
         "/boot/nyxloader"
     )
 
-
     if savedHash == currentHash then
 
         return true
@@ -254,10 +256,104 @@ end
 -- ======================================
 
 
-term.clear()
-term.setCursorPos(1,1)
+local function bootSystem(system)
 
 
+    -- Vérification fichier
+
+    if not fs.exists(system.file) then
+
+
+        ui.warning(
+            "Erreur de boot\n\n" ..
+            "Fichier introuvable :\n" ..
+            system.file,
+            {
+                "Retour NyxLoader"
+            }
+        )
+
+
+        return false
+
+    end
+
+
+
+
+    -- CraftOS Shell
+
+    if system.id == "craftos" then
+
+        term.clear()
+        term.setCursorPos(1,1)
+
+        os.run(
+            {},
+            "/rom/programs/shell.lua"
+        )
+
+        return true
+
+    end
+
+
+
+
+
+    -- OS normal
+
+
+    term.clear()
+    term.setCursorPos(1,1)
+
+
+
+    local ok, err =
+        pcall(
+            function()
+
+
+                shell.run(
+                    system.file
+                )
+
+
+            end
+        )
+
+
+
+    if not ok then
+
+
+        ui.warning(
+            "Crash de l'OS\n\n" ..
+            tostring(err),
+            {
+                "Retour NyxLoader"
+            }
+        )
+
+
+        return false
+
+    end
+
+
+
+    -- l'OS est terminé
+
+    return false
+
+
+end
+
+
+
+
+
+-- Secure boot
 
 if not secureBootCheck() then
 
@@ -271,33 +367,43 @@ end
 
 
 
-local systems = scanner.scan()
+
+
+-- Boucle NyxLoader
+
+while true do
+
+
+    local systems =
+        scanner.scan()
 
 
 
-if #systems == 0 then
+    if #systems == 0 then
 
-    ui.message(
-        "Aucun systeme trouve."
-    )
+        ui.message(
+            "Aucun systeme trouve."
+        )
 
-    return
+        return
 
-end
-
-
-
-local selected = ui.menu(
-    systems,
-    config
-)
+    end
 
 
 
-if selected then
+    local selected =
+        ui.menu(
+            systems,
+            config
+        )
 
-    shell.run(
-        selected.file
-    )
+
+
+    if selected then
+
+        bootSystem(selected)
+
+    end
+
 
 end

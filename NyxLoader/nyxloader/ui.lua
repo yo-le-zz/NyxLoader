@@ -1,19 +1,22 @@
-local basalt = require("lib/basalt")
-
+local basalt = dofile(NYXLOADER_PATH .. "/lib/basalt.lua")
 
 local ui = {}
 
 
 -- ======================================
--- Initialisation
+-- Utilitaires
 -- ======================================
 
 local function clear()
+
+    term.setBackgroundColor(colors.black)
+    term.setTextColor(colors.white)
 
     term.clear()
     term.setCursorPos(1,1)
 
 end
+
 
 
 local function center(text, y)
@@ -24,8 +27,9 @@ local function center(text, y)
         (w - #text) / 2
     )
 
+
     term.setCursorPos(
-        math.max(x,1),
+        math.max(1,x),
         y
     )
 
@@ -35,45 +39,103 @@ end
 
 
 
--- ======================================
--- Message simple
--- ======================================
+local function drawFrame(x,y,w,h,color)
 
-function ui.message(text)
+    term.setBackgroundColor(colors.black)
+    term.setTextColor(colors.white)
 
-    clear()
 
-    center(
-        "NyxLoader",
-        2
+    for i = 0,h-1 do
+
+        term.setCursorPos(
+            x,
+            y+i
+        )
+
+
+        write(
+            string.rep(" ",w)
+        )
+
+    end
+
+
+end
+
+
+
+local function drawTextBox(
+    x,
+    y,
+    w,
+    text,
+    selected
+)
+
+
+    if selected then
+
+        term.setBackgroundColor(
+            colors.blue
+        )
+
+    else
+
+        term.setBackgroundColor(
+            colors.gray
+        )
+
+    end
+
+
+    term.setTextColor(
+        colors.white
     )
 
 
     term.setCursorPos(
-        2,
-        5
+        x,
+        y
     )
 
-    print(text)
+
+    local value =
+        " " .. text
 
 
-    print("")
-    print("Appuyez sur une touche...")
+    write(
+        string.sub(
+            value ..
+            string.rep(
+                " ",
+                w
+            ),
+            1,
+            w
+        )
+    )
 
 
-    os.pullEvent("key")
+    term.setBackgroundColor(
+        colors.black
+    )
+
 
 end
 
 
 
 -- ======================================
--- Warning / choix
+-- Message
 -- ======================================
 
-function ui.warning(text, choices)
+function ui.message(text)
 
     clear()
+
+
+    local w,h =
+        term.getSize()
 
 
     center(
@@ -82,24 +144,110 @@ function ui.warning(text, choices)
     )
 
 
+    local lines = {}
+
+    for line in text:gmatch("[^\n]+") do
+        table.insert(lines,line)
+    end
+
+
+    local start =
+        math.floor(h/2)
+        - (#lines/2)
+
+
+    for i,line in ipairs(lines) do
+
+        term.setCursorPos(
+            2,
+            start+i
+        )
+
+        print(line)
+
+    end
+
+
+
     term.setCursorPos(
         2,
-        5
+        h-2
+    )
+
+
+    print(
+        "[ENTER] Retour au menu"
+    )
+
+
+
+    while true do
+
+        basalt.update()
+
+
+        local event,key =
+            os.pullEvent("key")
+
+
+        if key == keys.enter then
+            return
+        end
+
+    end
+
+end
+
+
+
+-- ======================================
+-- Warning
+-- ======================================
+
+function ui.warning(text, choices)
+
+
+    clear()
+
+
+    local w,h =
+        term.getSize()
+
+
+    center(
+        "NyxLoader",
+        2
+    )
+
+
+    local y =
+        math.floor(h/2)
+        - (#choices/2)
+
+
+    term.setCursorPos(
+        2,
+        y-2
     )
 
 
     print(text)
 
 
-    print("")
+
+    for i,choice in ipairs(choices) do
 
 
-    for i, choice in ipairs(choices) do
+        term.setCursorPos(
+            4,
+            y+i
+        )
+
 
         print(
-            "[" ..
-            i ..
-            "] " ..
+            "["..
+            i..
+            "] "..
             choice
         )
 
@@ -109,22 +257,35 @@ function ui.warning(text, choices)
 
     while true do
 
-        local _, key = os.pullEvent("key")
+
+        basalt.update()
 
 
-        local num =
-            tonumber(
-                keys.getName(key)
-            )
+        local event,key =
+            os.pullEvent()
 
 
-        if num and choices[num] then
+        if event == "key" then
 
-            return num
+
+            local number =
+                tonumber(
+                    keys.getName(key)
+                )
+
+
+            if number
+            and choices[number] then
+
+                return number
+
+            end
 
         end
 
+
     end
+
 
 end
 
@@ -142,6 +303,14 @@ function ui.menu(
 
     local selected = 1
 
+    local timeout =
+        config.timeout
+
+
+    local timer =
+        os.startTimer(1)
+
+
 
     while true do
 
@@ -149,122 +318,232 @@ function ui.menu(
         clear()
 
 
-        center(
-            config.title,
-            2
-        )
-
-
-        local width, height =
+        local width,height =
             term.getSize()
 
 
 
-        local startY =
-            math.floor(height / 2)
-            - (#systems / 2)
+        center(
+            config.title or "NyxLoader",
+            2
+        )
 
 
 
-        for i, system in ipairs(systems) do
-
-
-            term.setCursorPos(
-                5,
-                startY + i
+        local boxWidth =
+            math.min(
+                40,
+                width-4
             )
 
 
-            if i == selected then
-
-                term.setBackgroundColor(
-                    colors.blue
-                )
-
-                term.setTextColor(
-                    colors.white
-                )
-
-            else
-
-                term.setBackgroundColor(
-                    colors.black
-                )
-
-                term.setTextColor(
-                    colors.white
-                )
-
-            end
+        local boxHeight =
+            #systems + 4
 
 
 
-            write(
-                " "
-                .. system.name
-                .. " "
+        local boxX =
+            math.floor(
+                (width-boxWidth)/2
             )
 
 
-            term.setBackgroundColor(
-                colors.black
+        local boxY =
+            math.floor(
+                (height-boxHeight)/2
             )
+
+
+
+        -- cadre
+
+        drawFrame(
+            boxX,
+            boxY,
+            boxWidth,
+            boxHeight,
+            config.bootColor or colors.blue
+        )
+
+
+
+        for i,system in ipairs(systems) do
+
+
+            drawTextBox(
+                boxX,
+                boxY+i+1,
+                boxWidth,
+                system.name,
+                i == selected
+            )
+
 
         end
 
 
 
+        term.setBackgroundColor(
+            colors.black
+        )
+
+
+        term.setTextColor(
+            colors.white
+        )
+
+
         term.setCursorPos(
             2,
-            height - 2
+            height-1
         )
 
 
         write(
-            "Auto boot dans "
-            .. config.timeout
-            .. "s"
+            "Auto boot : "
+            ..
+            timeout
+            ..
+            "s"
         )
 
 
 
-        local event, key =
-            os.pullEvent("key")
+        basalt.update()
 
 
 
-        if key == keys.up then
-
-            selected =
-                selected - 1
+        local event,a,b =
+            os.pullEvent()
 
 
-            if selected < 1 then
-                selected = #systems
+
+        -- Timer
+
+        if event == "timer"
+        and a == timer then
+
+
+            timeout =
+                timeout - 1
+
+
+
+            if timeout <= 0 then
+
+                return systems[selected]
+
             end
 
 
-        elseif key == keys.down then
+
+            timer =
+                os.startTimer(1)
+
+        end
 
 
-            selected =
-                selected + 1
+
+        -- clavier
+
+        if event == "key" then
 
 
-            if selected > #systems then
-                selected = 1
+            if a == keys.up then
+
+
+                selected =
+                    selected - 1
+
+
+                if selected < 1 then
+                    selected = #systems
+                end
+
+
+                timeout =
+                    config.timeout
+
+
+
+            elseif a == keys.down then
+
+
+                selected =
+                    selected + 1
+
+
+                if selected > #systems then
+                    selected = 1
+                end
+
+
+                timeout =
+                    config.timeout
+
+
+
+            elseif a == keys.enter then
+
+
+                return systems[selected]
+
+
             end
 
 
-        elseif key == keys.enter then
+        end
 
 
-            return systems[selected]
+
+
+        -- souris
+
+        if event == "mouse_click" then
+
+
+            local x =
+                a
+
+            local y =
+                b
+
+
+
+            for i,_ in ipairs(systems) do
+
+
+                local line =
+                    boxY+i
+
+
+
+                if y == line
+                and x >= boxX
+                and x <= boxX+boxWidth then
+
+
+                    selected = i
+
+
+                    timeout =
+                        config.timeout
+
+
+                    return systems[selected]
+
+
+                end
+
+
+            end
+
 
         end
 
 
     end
+
 
 end
 

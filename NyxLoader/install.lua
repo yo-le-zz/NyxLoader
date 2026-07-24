@@ -84,14 +84,18 @@ local function generateHash(path)
 
     local function scan(dir)
 
-        for _, file in ipairs(fs.list(dir)) do
+        for _, name in ipairs(fs.list(dir)) do
 
-            local full = fs.combine(dir, file)
+            local full = fs.combine(dir, name)
 
             if fs.isDir(full) then
+
                 scan(full)
+
             else
+
                 table.insert(files, full)
+
             end
 
         end
@@ -104,21 +108,38 @@ local function generateHash(path)
     table.sort(files)
 
 
-    local data = ""
-
-    for _, file in ipairs(files) do
-
-        local f = fs.open(file, "rb")
-        local content = f.readAll()
-        f.close()
+    local buffer = ""
 
 
-        data = data .. file .. ":" .. content .. "\n"
+    for _, filePath in ipairs(files) do
+
+
+        local file = fs.open(
+            filePath,
+            "r"
+        )
+
+
+        local content = file.readAll()
+
+        file.close()
+
+
+
+        local relative = filePath:sub(#path + 2)
+
+
+        buffer = buffer
+            .. relative
+            .. "\n"
+            .. content
+            .. "\n"
+
 
     end
 
 
-    return crypto.sha256(data)
+    return crypto.sha256(buffer)
 
 end
 
@@ -179,8 +200,16 @@ end
 
 println("[2/5] Copie de NyxLoader")
 
+local installerPath = shell.getRunningProgram()
+local installerDir = fs.getDir(installerPath)
+local source = installerDir .. "/nyxloader"
+
+if not fs.exists(source) then
+    error("Dossier nyxloader introuvable sur le disque")
+end
+
 copyDirectory(
-    "nyxloader",
+    source,
     "/boot/nyxloader"
 )
 

@@ -179,8 +179,16 @@ end
 
 println("[2/5] Copie de NyxLoader")
 
+local installerPath = shell.getRunningProgram()
+local installerDir = fs.getDir(installerPath)
+local source = installerDir .. "/nyxloader"
+
+if not fs.exists(source) then
+    error("Dossier nyxloader introuvable sur le disque")
+end
+
 copyDirectory(
-    "nyxloader",
+    source,
     "/boot/nyxloader"
 )
 

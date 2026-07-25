@@ -181,10 +181,33 @@ end
 
 
 
+-- Mode isolation
+
+local isolationMode = false
+
+println("")
+println("=== Mode Isolation (optionnel) ===")
+println("")
+println("NyxLoader peut devenir le seul element")
+println("present sur ce PC : tout ce qui s'y")
+println("trouve deja (ou qui y apparait plus")
+println("tard) est deplace sur un disque.")
+println("")
+
+local isolationChoice = ask(
+    "Activer le mode isolation ? (o/n)"
+)
+
+if isolationChoice == "o" or isolationChoice == "O" then
+    isolationMode = true
+end
+
+
+
 -- Installation
 
 println("")
-println("[1/5] Creation de /boot")
+println("[1/6] Creation de /boot")
 
 
 if fs.exists("/boot/nyxloader") then
@@ -198,7 +221,7 @@ end
 
 
 
-println("[2/5] Copie de NyxLoader")
+println("[2/6] Copie de NyxLoader")
 
 local installerPath = shell.getRunningProgram()
 local installerDir = fs.getDir(installerPath)
@@ -215,7 +238,7 @@ copyDirectory(
 
 
 
-println("[3/5] Creation startup.lua")
+println("[3/6] Creation startup.lua")
 
 
 local startup = fs.open("/startup.lua", "w")
@@ -228,7 +251,7 @@ startup.close()
 
 
 
-println("[4/5] Creation configuration")
+println("[4/6] Creation configuration")
 
 
 local config = fs.open("/boot/config.lua", "w")
@@ -239,7 +262,8 @@ return {
     title = "NyxLoader",
     timeout = 10,
     bootColor = colors.blue,
-    secureBoot = ]] .. tostring(secureBoot) .. [[
+    secureBoot = ]] .. tostring(secureBoot) .. [[,
+    isolation = ]] .. tostring(isolationMode) .. [[
 }
 ]]
 )
@@ -248,7 +272,7 @@ config.close()
 
 
 
-println("[5/5] Secure Boot")
+println("[5/6] Secure Boot")
 
 
 if secureBoot then
@@ -269,6 +293,46 @@ if secureBoot then
 else
 
     println("Secure Boot desactive.")
+
+end
+
+
+
+println("[6/6] Mode isolation")
+
+
+if isolationMode then
+
+    local isolation = dofile(
+        "/boot/nyxloader/lib/isolation.lua"
+    )
+
+    local stray = isolation.listStrayEntries()
+
+    if #stray == 0 then
+
+        println("Rien a deplacer.")
+
+    else
+
+        println(
+            #stray .. " element(s) a deplacer."
+        )
+        println(
+            "(Q pour annuler si aucun disque"
+        )
+        println(
+            "n'est disponible)"
+        )
+        println("")
+
+        isolation.enforce(println)
+
+    end
+
+else
+
+    println("Mode isolation desactive.")
 
 end
 

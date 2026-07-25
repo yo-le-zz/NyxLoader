@@ -170,6 +170,30 @@ file.close()
 
 
 -- ======================================
+-- Mode Isolation
+-- ======================================
+
+
+print("")
+print("=== Mode Isolation (optionnel) ===")
+print("")
+print("NyxLoader peut devenir le seul element")
+print("present sur ce PC : tout ce qui s'y")
+print("trouve deja (ou qui y apparait plus")
+print("tard) est deplace sur un disque.")
+print("")
+
+write("Activer le mode isolation ? (o/n) ")
+
+local isolationChoice = read()
+
+local isolationMode =
+    isolationChoice == "o"
+    or isolationChoice == "O"
+
+
+
+-- ======================================
 -- Configuration
 -- ======================================
 
@@ -186,7 +210,9 @@ config.write(
 return {
     title = "NyxLoader",
     timeout = 10,
-    secureBoot = false
+    bootColor = colors.blue,
+    secureBoot = false,
+    isolation = ]] .. tostring(isolationMode) .. [[
 }
 ]]
 )
@@ -238,6 +264,41 @@ else
     print(
         "Secure Boot désactivé."
     )
+
+end
+
+
+
+-- ======================================
+-- Nettoyage initial (mode isolation)
+-- ======================================
+
+
+if isolationMode then
+
+    print("")
+    print("=== Mode Isolation ===")
+
+    local isolation = dofile(
+        "/boot/nyxloader/lib/isolation.lua"
+    )
+
+    local stray = isolation.listStrayEntries()
+
+    if #stray == 0 then
+
+        print("Rien a deplacer.")
+
+    else
+
+        print(
+            #stray .. " element(s) a deplacer."
+        )
+        print("(Q pour annuler si besoin)")
+
+        isolation.enforce(print)
+
+    end
 
 end
 

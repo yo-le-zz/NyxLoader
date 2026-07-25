@@ -17,7 +17,11 @@ local default = {
     bootColor = colors.blue,
 
     -- Secure Boot actif
-    secureBoot = false
+    secureBoot = false,
+
+    -- Mode isolation : NyxLoader deplace automatiquement tout ce
+    -- qui n'est pas lui-meme vers un disque
+    isolation = false
 }
 
 
@@ -133,6 +137,13 @@ function Config.save(config)
     file.write(
         "    secureBoot = "
         .. tostring(config.secureBoot)
+        .. ",\n"
+    )
+
+
+    file.write(
+        "    isolation = "
+        .. tostring(config.isolation)
         .. "\n"
     )
 

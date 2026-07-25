@@ -31,6 +31,7 @@ local hash = load("lib/hash.lua")
 local scanner = load("lib/scanner.lua")
 local configManager = load("config.lua")
 local uninstaller = load("lib/uninstall.lua")
+local isolation = load("lib/isolation.lua")
 
 
 -- ======================================
@@ -50,6 +51,7 @@ config.title = config.title or "NyxLoader"
 config.timeout = config.timeout or 10
 config.secureBoot = config.secureBoot or false
 config.bootColor = config.bootColor or colors.blue
+config.isolation = config.isolation or false
 
 
 -- ======================================
@@ -423,6 +425,19 @@ end
 -- Boucle NyxLoader
 
 while true do
+
+
+    -- Mode isolation : NyxLoader doit rester seul sur le PC
+
+    if config.isolation then
+
+        isolation.enforce(
+            nil,
+            ui.warning
+        )
+
+    end
+
 
 
     local systems =

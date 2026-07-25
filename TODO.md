@@ -12,7 +12,7 @@
 - [x] **Fix Menu ui**
   Le cadre du menu est transparent à l'intérieur : seules les
   bordures sont dessinées, dans la couleur `bootColor` (ou la
-  couleur propre à l'OS sélectionné, voir plus bas).
+  couleur propre à l'OS sélectionné).
 
 - [x] **Fix Failed boot message et retour au menu avec Entrée**
   Écran `ui.error()` dédié aux échecs de boot, qui attend la touche
@@ -23,8 +23,9 @@
   `/boot/config.lua`) : la fonction n'existait pas. Ajoutée.
 
 - [x] **`webinstall.lua` incomplet**
-  `lib/loader.lua` puis `lib/uninstall.lua` n'étaient pas
-  téléchargés par l'installateur web alors que NyxLoader en dépend.
+  `lib/loader.lua`, `lib/uninstall.lua` et `lib/isolation.lua`
+  n'étaient pas téléchargés par l'installateur web, et le fichier de
+  config généré n'écrivait ni `bootColor` ni `isolation`.
 
 ## 💡 Idées ajoutées
 
@@ -36,20 +37,32 @@
 - [x] **Icône par OS → splash screen**
   Un champ `icon` dans `boot.json` (image `.nfp`) affiche un splash
   screen centré et ajusté à la taille de l'écran juste avant de
-  démarrer l'OS. Le chemin de l'icône est maintenant correctement
-  résolu par rapport au dossier du `boot.json` (bug corrigé au
-  passage : il n'était jamais résolu avant).
+  démarrer l'OS.
 
 - [x] **Couleur par OS**
-  Un champ `color` dans `boot.json` (nom de couleur, ex. `"cyan"`)
-  surligne l'entrée correspondante dans le menu avec sa propre
-  couleur au lieu du bleu par défaut.
+  Un champ `color` dans `boot.json` surligne l'entrée correspondante
+  dans le menu avec sa propre couleur.
 
 - [x] **OS d'exemple**
-  [`examples/NyxTestOS`](examples/NyxTestOS) : un OS minimal (infos
-  système, quelques commandes, retour au menu) avec son propre
-  `boot.json`, `icon` et `color`, pour tester rapidement NyxLoader
-  sans avoir à écrire un OS complet.
+  [`examples/NyxTestOS`](examples/NyxTestOS) : OS minimal avec
+  `boot.json`, `icon` et `color` pour tester NyxLoader rapidement.
+
+- [x] **Mode isolation**
+  Nouveau module `lib/isolation.lua`. NyxLoader peut devenir le seul
+  élément présent sur le PC principal :
+  - Optionnel, proposé à l'installation (`install.lua` /
+    `webinstall.lua`), et activable ensuite via `isolation = true`
+    dans `/boot/config.lua`.
+  - À l'installation : déplace immédiatement tout ce qui existe déjà
+    sur le PC vers un disque (en demandant d'en insérer un si
+    besoin).
+  - En continu : à chaque retour au menu, NyxLoader repère tout ce
+    qui est apparu depuis (un OS qui vient de s'installer, un
+    fichier téléchargé...) et le déplace vers un disque.
+  - Ne touche jamais `/rom`, `/boot`, ni les disques déjà branchés.
+  - Ne casse jamais les `boot.json` déplacés : `file`/`icon` sont
+    toujours résolus par rapport à l'emplacement réel du dossier de
+    l'OS, où qu'il soit.
 
 ## 🔭 Pour plus tard
 
@@ -58,10 +71,14 @@
       l'écran
 - [ ] Bouton "Ignorer" (skip) sur le splash screen au lieu d'un
       délai fixe
+- [ ] Mode isolation : afficher le message d'attente de disque sur
+      l'écran externe si un moniteur est utilisé (actuellement il
+      s'affiche toujours sur l'écran natif de l'ordinateur)
 
 ---
 
 ⚠️ Tout ceci a été vérifié syntaxiquement (`luac -p`) mais n'a pas pu
 être testé dans un vrai monde CC:Tweaked (pas d'accès à Minecraft
 depuis cet environnement). Un test en jeu reste recommandé,
-notamment pour le boot CraftOS Shell et le splash screen.
+notamment pour le boot CraftOS Shell, le splash screen, et le mode
+isolation (déplacement de fichiers, détection de disques).

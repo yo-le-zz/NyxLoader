@@ -18,6 +18,7 @@ Il permet de démarrer plusieurs systèmes CC:Tweaked avec une interface graphiq
 - 🗑️ Désinstallation propre (disque, GitHub, ou depuis le menu de boot)
 - 🖼️ Splash screen avec logo par OS (`icon` dans `boot.json`)
 - 🎨 Couleur de menu personnalisable par OS (`color` dans `boot.json`)
+- 🧹 Mode isolation : NyxLoader reste seul sur le PC principal
 - 🖼️ Support des écrans externes
 - ⏱️ Timeout configurable
 - 🔐 Secure Boot avec Cryptographic Accelerator (Classic Peripherals)
@@ -113,6 +114,52 @@ Dans les deux cas, après confirmation, l'installateur supprime :
 - `/boot/secureboot.hash`
 - `/startup.lua` (uniquement s'il appartient à NyxLoader — un
   `startup.lua` personnalisé n'est jamais touché)
+
+---
+
+# 🧹 Mode Isolation
+
+Le mode isolation fait en sorte que **NyxLoader soit le seul élément
+présent sur le disque dur principal** de l'ordinateur. Tout le
+reste — un OS existant, un fichier qu'un programme installe, un
+téléchargement fait depuis le CraftOS Shell — est automatiquement
+déplacé vers un disque.
+
+## Activation
+
+Le mode isolation est **optionnel** et se propose lors de
+l'installation (disque ou GitHub) :
+
+```
+Activer le mode isolation ? (o/n)
+```
+
+Il peut aussi être activé plus tard en éditant
+`/boot/config.lua` :
+
+```lua
+isolation = true
+```
+
+## Fonctionnement
+
+- **À l'installation** : si des fichiers existent déjà sur le PC,
+  NyxLoader les déplace immédiatement vers un disque (en demandant
+  d'en insérer un si aucun n'est disponible).
+- **En continu** : à chaque retour au menu NyxLoader (après avoir
+  quitté un OS, ou au démarrage), NyxLoader revérifie la racine du
+  PC. Si quelque chose de nouveau est apparu (un OS qui vient de
+  s'installer, un fichier téléchargé...), il est déplacé
+  automatiquement vers un disque déjà inséré, ou NyxLoader demande
+  d'en insérer un.
+- **Rien n'est jamais perdu** : NyxLoader ne touche jamais à
+  `/rom`, `/boot` (lui-même), ni aux disques déjà branchés — seuls
+  les éléments "en trop" à la racine du PC sont déplacés.
+- **Les chemins restent valides** : le champ `file` (et `icon`) d'un
+  `boot.json` est toujours résolu par rapport à l'endroit où se
+  trouve ce `boot.json`. Déplacer tout le dossier d'un OS vers un
+  disque ne casse donc jamais son démarrage — aucune réécriture du
+  `boot.json` n'est nécessaire.
 
 ---
 
@@ -238,7 +285,8 @@ Exemple :
 return {
     title = "NyxLoader",
     timeout = 10,
-    secureBoot = true
+    secureBoot = true,
+    isolation = false
 }
 ```
 
@@ -271,6 +319,16 @@ secureBoot = true
 ```
 
 Active la vérification cryptographique.
+
+---
+
+### 🧹 Mode isolation
+
+```lua
+isolation = true
+```
+
+Voir la section [Mode Isolation](#-mode-isolation) plus haut.
 
 ---
 
@@ -317,6 +375,9 @@ NyxLoader
         │
         ├── uninstall.lua
         │   🗑️ Désinstallation (utilisé par le menu de boot)
+        │
+        ├── isolation.lua
+        │   🧹 Mode isolation
         │
         ├── hash.lua
         │   🔐 Fonctions de hash

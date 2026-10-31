@@ -4,7 +4,7 @@ local path = "/boot/config.lua"
 
 
 -- ======================================
--- Valeurs par défaut
+-- Valeurs par defaut
 -- ======================================
 
 local default = {
@@ -21,19 +21,22 @@ local default = {
 
     -- Mode isolation : NyxLoader deplace automatiquement tout ce
     -- qui n'est pas lui-meme vers un disque
-    isolation = false
+    isolation = false,
+
+    -- Langue de l'installateur (en, fr, es, de)
+    lang = "en"
 }
 
 
 
 -- ======================================
--- Valeurs par défaut (copie)
+-- Valeurs par defaut (copie)
 -- ======================================
 
 -- nyxloader.lua appelle configManager.default() quand
 -- /boot/config.lua n'existe pas encore : on renvoie une
--- copie de la table par défaut (jamais la table originale,
--- pour éviter de la modifier par accident).
+-- copie de la table par defaut (jamais la table originale,
+-- pour eviter de la modifier par accident).
 
 function Config.default()
 
@@ -76,7 +79,7 @@ function Config.load()
 
 
 
-    -- Complète les valeurs manquantes
+    -- Complete les valeurs manquantes
 
     for key, value in pairs(default) do
 
@@ -144,7 +147,14 @@ function Config.save(config)
     file.write(
         "    isolation = "
         .. tostring(config.isolation)
-        .. "\n"
+        .. ",\n"
+    )
+
+
+    file.write(
+        "    lang = \""
+        .. tostring(config.lang or "en")
+        .. "\"\n"
     )
 
 

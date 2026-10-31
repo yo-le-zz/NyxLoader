@@ -4,14 +4,14 @@
 --
 -- Objectif : NyxLoader (et lui seul) reste sur le disque dur
 -- principal de l'ordinateur. Tout le reste (un OS qui vient de
--- s'installer, un fichier téléchargé à la racine, etc.) est
--- automatiquement déplacé sur un disque externe.
+-- s'installer, un fichier telecharge a la racine, etc.) est
+-- automatiquement deplace sur un disque externe.
 --
 -- Comme le chemin d'un OS dans son boot.json ("file", "icon") est
--- toujours résolu par rapport à l'endroit où se trouve son
--- boot.json (fs.combine(osPath, ...)), déplacer tout le dossier
+-- toujours resolu par rapport a l'endroit ou se trouve son
+-- boot.json (fs.combine(osPath, ...)), deplacer tout le dossier
 -- d'un OS vers un disque ne casse jamais ses chemins : le scanner
--- les recalcule à chaque scan, où que soit le dossier.
+-- les recalcule a chaque scan, ou que soit le dossier.
 
 
 local Isolation = {}
@@ -19,7 +19,7 @@ local Isolation = {}
 
 
 -- ======================================
--- Éléments jamais déplacés
+-- Elements jamais deplaces
 -- ======================================
 
 local protectedNames = {
@@ -32,8 +32,8 @@ local protectedNames = {
 
 
 
--- Points de montage des disques actuellement branchés : on ne les
--- déplace jamais eux-mêmes (ce sont des periphériques, pas des
+-- Points de montage des disques actuellement branches : on ne les
+-- deplace jamais eux-memes (ce sont des peripheriques, pas des
 -- fichiers).
 
 local function mountedDiskPaths()
@@ -61,7 +61,7 @@ end
 
 
 -- ======================================
--- Détection des éléments "en trop"
+-- Detection des elements "en trop"
 -- ======================================
 
 function Isolation.listStrayEntries()
@@ -90,7 +90,7 @@ end
 -- Recherche d'un disque disponible
 -- ======================================
 
--- Renvoie le point de montage du premier disque inséré trouvé
+-- Renvoie le point de montage du premier disque insere trouve
 -- (peripheral.call("getMountPath") est nil si le lecteur est vide).
 
 function Isolation.findFreeDisk()
@@ -119,9 +119,9 @@ end
 -- Attente d'un disque
 -- ======================================
 
--- Bloque jusqu'à ce qu'un disque soit détecté, ou que l'utilisateur
--- annule avec Q. Affiche un message simple en plein écran (ce
--- module ne dépend pas de ui.lua pour rester réutilisable depuis
+-- Bloque jusqu'a ce qu'un disque soit detecte, ou que l'utilisateur
+-- annule avec Q. Affiche un message simple en plein ecran (ce
+-- module ne depend pas de ui.lua pour rester reutilisable depuis
 -- install.lua / webinstall.lua).
 
 function Isolation.waitForDisk()
@@ -161,7 +161,7 @@ end
 
 
 -- ======================================
--- Déplacement
+-- Deplacement
 -- ======================================
 
 local function moveOne(name, diskMount, log)
@@ -170,7 +170,7 @@ local function moveOne(name, diskMount, log)
     local destination = fs.combine(diskMount, name)
 
 
-    -- Évite d'écraser un élément existant du même nom sur le disque
+    -- Evite d'ecraser un element existant du meme nom sur le disque
 
     if fs.exists(destination) then
 
@@ -204,10 +204,10 @@ end
 -- Nettoyage complet
 -- ======================================
 
--- log : fonction optionnelle (text) appelée pour chaque étape.
--- ask : fonction optionnelle (message, choices) -> index, utilisée
+-- log : fonction optionnelle (text) appelee pour chaque etape.
+-- ask : fonction optionnelle (message, choices) -> index, utilisee
 --       pour demander confirmation avant de bloquer sur
---       waitForDisk() quand aucun disque n'est déjà disponible. Si
+--       waitForDisk() quand aucun disque n'est deja disponible. Si
 --       elle n'est pas fournie, on attend directement.
 
 function Isolation.enforce(log, ask)

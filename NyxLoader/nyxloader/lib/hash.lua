@@ -29,7 +29,7 @@ end
 
 
 -- ======================================
--- Disponibilité
+-- Disponibilite
 -- ======================================
 
 function Hash.available()
@@ -104,7 +104,7 @@ end
 
 
 -- ======================================
--- Liste fichiers récursive
+-- Liste fichiers recursive
 -- ======================================
 
 local function listFiles(path, result)
@@ -192,7 +192,7 @@ end
 
 
 -- ======================================
--- Vérification
+-- Verification
 -- ======================================
 
 function Hash.verify(path, expected)

@@ -5,7 +5,7 @@ package.path = BASE .. "/?.lua;" .. BASE .. "/?/init.lua;" .. package.path
 
 
 -- ======================================
--- Affichage écran / terminal
+-- Affichage ecran / terminal
 -- ======================================
 
 local monitor = peripheral.find("monitor")
@@ -170,7 +170,7 @@ local function secureBootCheck()
 
 
 
-    -- Vérification hash
+    -- Verification hash
 
     local file = fs.open(
         "/boot/secureboot.hash",
@@ -195,7 +195,7 @@ local function secureBootCheck()
 
 
 
-    -- Hash différent
+    -- Hash different
 
     local choice = ui.warning(
         "SECURE BOOT FAILURE\n\n" ..
@@ -252,7 +252,7 @@ end
 local function bootSystem(system)
 
 
-    -- Désinstaller NyxLoader (entrée spéciale du menu)
+    -- Desinstaller NyxLoader (entree speciale du menu)
 
     if system.id == "uninstall" then
 
@@ -293,7 +293,7 @@ local function bootSystem(system)
 
 
 
-    -- Vérification fichier
+    -- Verification fichier
 
     if not fs.exists(system.file) then
 
@@ -315,9 +315,9 @@ local function bootSystem(system)
 
     if system.id == "craftos" then
 
-        -- Si NyxLoader affichait sur un écran externe, on repasse
+        -- Si NyxLoader affichait sur un ecran externe, on repasse
         -- sur le terminal natif de l'ordinateur avant de lancer le
-        -- vrai shell CraftOS (sinon on tape "à l'aveugle").
+        -- vrai shell CraftOS (sinon on tape "a l'aveugle").
 
         local previousTerm = term.current()
 
@@ -395,7 +395,7 @@ local function bootSystem(system)
 
 
 
-    -- l'OS est terminé
+    -- l'OS est termine
 
     return false
 

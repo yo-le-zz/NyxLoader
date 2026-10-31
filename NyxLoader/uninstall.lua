@@ -25,7 +25,7 @@ local function ask(text)
 end
 
 
--- Suppression récursive sécurisée
+-- Suppression recursive securisee
 local function remove(path)
 
     if fs.exists(path) then

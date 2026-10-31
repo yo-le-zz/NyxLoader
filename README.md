@@ -27,6 +27,9 @@ Il permet de démarrer plusieurs systèmes CC:Tweaked avec une interface graphiq
 
 # 📥 Installation
 
+> Version 1.1.0 : l'installateur affiche un menu de langue (en/fr/es/de), des menus d'options et une barre de progression, puis **redemarre tout seul**. Option `--quiet` : aucune interface ni redemarrage (utilise par l'installateur NyxOS).
+
+
 ## 💽 Installation depuis un disque
 
 Téléchargez la dernière release puis copiez le dossier `NyxLoader` à la racine d'un disque CC:Tweaked :

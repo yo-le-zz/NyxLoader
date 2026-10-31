@@ -28,11 +28,11 @@ function require(name)
     return module
 end
 
--- Au boot, NyxLoader est lancé directement depuis /startup.lua,
+-- Au boot, NyxLoader est lance directement depuis /startup.lua,
 -- donc l'API "shell" n'existe pas encore (elle n'est normalement
--- créée que par /rom/programs/shell.lua). Sans elle, tout appel à
+-- creee que par /rom/programs/shell.lua). Sans elle, tout appel a
 -- shell.run(...) plantait avec "attempt to call a nil value".
--- On fournit ici une implémentation minimale mais fonctionnelle.
+-- On fournit ici une implementation minimale mais fonctionnelle.
 
 if not shell then
 
@@ -55,7 +55,7 @@ if not shell then
     end
 
     function shell.exit()
-        -- rien à faire : NyxLoader gère sa propre boucle
+        -- rien a faire : NyxLoader gere sa propre boucle
     end
 
 end

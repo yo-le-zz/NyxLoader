@@ -39,10 +39,10 @@ end
 
 
 
--- Dessine uniquement le contour de la boîte (haut, bas, gauche,
--- droite) dans la couleur donnée. L'intérieur n'est jamais rempli :
--- il reste "transparent", c'est à dire tel qu'il était déjà affiché
--- à l'écran avant l'appel (fond déjà nettoyé par clear()).
+-- Dessine uniquement le contour de la boite (haut, bas, gauche,
+-- droite) dans la couleur donnee. L'interieur n'est jamais rempli :
+-- il reste "transparent", c'est a dire tel qu'il etait deja affiche
+-- a l'ecran avant l'appel (fond deja nettoye par clear()).
 
 local function drawFrame(x,y,w,h,color)
 
@@ -148,9 +148,9 @@ end
 -- Splash screen (icone d'OS)
 -- ======================================
 
--- Affiché juste avant de démarrer un OS qui déclare un champ
+-- Affiche juste avant de demarrer un OS qui declare un champ
 -- "icon" dans son boot.json (image .nfp, format paintutils).
--- L'image est centrée sur l'écran, quelle que soit sa taille.
+-- L'image est centree sur l'ecran, quelle que soit sa taille.
 -- Si l'image est absente/invalide, la fonction ne fait rien :
 -- le boot continue normalement sans splash.
 
@@ -313,8 +313,8 @@ end
 -- Erreur de boot
 -- ======================================
 
--- Écran affiché quand un système ne démarre pas (fichier
--- manquant, crash de l'OS...). Contrairement à ui.warning, il
+-- Ecran affiche quand un systeme ne demarre pas (fichier
+-- manquant, crash de l'OS...). Contrairement a ui.warning, il
 -- ne propose qu'un seul choix : appuyer sur ENTREE pour revenir
 -- au menu NyxLoader.
 

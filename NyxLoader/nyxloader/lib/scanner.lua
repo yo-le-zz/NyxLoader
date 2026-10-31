@@ -3,7 +3,7 @@ local Scanner = {}
 
 
 -- ======================================
--- Couleurs nommées (pour boot.json)
+-- Couleurs nommees (pour boot.json)
 -- ======================================
 
 -- boot.json est du JSON : il ne peut pas contenir directement
@@ -96,7 +96,7 @@ end
 
 
 -- ======================================
--- Scan récursif
+-- Scan recursif
 -- ======================================
 
 local ignored = {
@@ -370,7 +370,7 @@ function Scanner.scan()
 
 
 
-    -- Désinstaller NyxLoader
+    -- Desinstaller NyxLoader
 
     table.insert(
         systems,

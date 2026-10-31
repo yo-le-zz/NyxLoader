@@ -1,6 +1,17 @@
 # TODO
 
-## ✅ Corrigé
+## ✅ 1.1.0
+
+- [x] Installateur NyxOS-style (langues, menus, barre de progression)
+- [x] Texte ASCII uniquement, redemarrage automatique
+- [x] `webinstall.lua` : `lib/isolation.lua` ajoute
+
+## 🔜 Prochaines idees
+
+- [ ] Defilement du menu de boot quand il y a beaucoup d'OS
+- [ ] Touche pour passer le splash
+
+## ✅ Corrige
 
 - [x] **Fix CratOS-Shell boot**
   Le `shell` global bricolé par `lib/loader.lua` n'implémentait pas

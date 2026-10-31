@@ -1,343 +1,39 @@
-local crypto = peripheral.find("cryptographic_accelerator")
-local monitor = peripheral.find("monitor")
+-- NyxLoader installer (disque) - ASCII only
+-- Copie /boot/nyxloader depuis le dossier "nyxloader" a cote de ce
+-- fichier, puis redemarre automatiquement.
 
+local VERSION = "1.1.0"
 
--- Gestion affichage
-local screen = term
-
-if monitor then
-    screen = monitor
-    screen.setTextScale(1)
-    screen.clear()
-    screen.setCursorPos(1, 1)
-end
-
-
-local function println(text)
-    screen.write(text)
-    local x, y = screen.getCursorPos()
-    screen.setCursorPos(1, y + 1)
-end
-
-
-local function ask(text)
-    println(text)
-    return read()
-end
-
-
--- Copie fichier
-local function copyFile(source, destination)
-
-    local input = fs.open(source, "rb")
-
-    if not input then
-        error("Impossible de lire : " .. source)
-    end
-
-    local data = input.readAll()
-    input.close()
-
-
-    local output = fs.open(destination, "wb")
-    output.write(data)
-    output.close()
-
-end
-
-
--- Copie dossier récursive
-local function copyDirectory(source, destination)
-
-    if not fs.exists(destination) then
-        fs.makeDir(destination)
-    end
-
-
-    for _, file in ipairs(fs.list(source)) do
-
-        local src = fs.combine(source, file)
-        local dst = fs.combine(destination, file)
-
-
-        if fs.isDir(src) then
-            copyDirectory(src, dst)
-        else
-            copyFile(src, dst)
-        end
-
-    end
-
-end
-
-
--- Génération hash dossier
-local function generateHash(path)
-
-    if not crypto then
-        return nil
-    end
-
-
-    local files = {}
-
-
-    local function scan(dir)
-
-        for _, name in ipairs(fs.list(dir)) do
-
-            local full = fs.combine(dir, name)
-
-            if fs.isDir(full) then
-
-                scan(full)
-
-            else
-
-                table.insert(files, full)
-
-            end
-
-        end
-
-    end
-
-
-    scan(path)
-
-    table.sort(files)
-
-
-    local buffer = ""
-
-
-    for _, filePath in ipairs(files) do
-
-
-        local file = fs.open(
-            filePath,
-            "r"
-        )
-
-
-        local content = file.readAll()
-
-        file.close()
-
-
-
-        local relative = filePath:sub(#path + 2)
-
-
-        buffer = buffer
-            .. relative
-            .. "\n"
-            .. content
-            .. "\n"
-
-
-    end
-
-
-    return crypto.sha256(buffer)
-
-end
-
-
-
-println("=== NyxLoader Installer ===")
-println("")
-
-
--- Secure boot
-
-local secureBoot = false
-
-
-if crypto then
-
-    println("[OK] Cryptographic Accelerator detecte")
-    secureBoot = true
-
-else
-
-    println("[WARN] Aucun Cryptographic Accelerator")
-    println("")
-    println("Secure Boot indisponible.")
-    println("")
-    println("1 - Annuler")
-    println("2 - Installer sans Secure Boot")
-
-
-    local choice = read()
-
-
-    if choice == "1" then
-        println("Installation annulee.")
-        return
-    end
-
-end
-
-
-
--- Mode isolation
-
-local isolationMode = false
-
-println("")
-println("=== Mode Isolation (optionnel) ===")
-println("")
-println("NyxLoader peut devenir le seul element")
-println("present sur ce PC : tout ce qui s'y")
-println("trouve deja (ou qui y apparait plus")
-println("tard) est deplace sur un disque.")
-println("")
-
-local isolationChoice = ask(
-    "Activer le mode isolation ? (o/n)"
-)
-
-if isolationChoice == "o" or isolationChoice == "O" then
-    isolationMode = true
-end
-
-
-
--- Installation
-
-println("")
-println("[1/6] Creation de /boot")
-
-
-if fs.exists("/boot/nyxloader") then
-    fs.delete("/boot/nyxloader")
-end
-
-
-if not fs.exists("/boot") then
-    fs.makeDir("/boot")
-end
-
-
-
-println("[2/6] Copie de NyxLoader")
-
-local installerPath = shell.getRunningProgram()
-local installerDir = fs.getDir(installerPath)
-local source = installerDir .. "/nyxloader"
+local dir = fs.getDir(shell.getRunningProgram())
+local source = fs.combine(dir, "nyxloader")
 
 if not fs.exists(source) then
-    error("Dossier nyxloader introuvable sur le disque")
+    printError("nyxloader folder not found next to install.lua")
+    return
 end
 
-copyDirectory(
-    source,
-    "/boot/nyxloader"
-)
-
-
-
-println("[3/6] Creation startup.lua")
-
-
-local startup = fs.open("/startup.lua", "w")
-
-startup.write(
-'shell.run("/boot/nyxloader/nyxloader.lua")'
-)
-
-startup.close()
-
-
-
-println("[4/6] Creation configuration")
-
-
-local config = fs.open("/boot/config.lua", "w")
-
-config.write(
-[[
-return {
-    title = "NyxLoader",
-    timeout = 10,
-    bootColor = colors.blue,
-    secureBoot = ]] .. tostring(secureBoot) .. [[,
-    isolation = ]] .. tostring(isolationMode) .. [[
-}
-]]
-)
-
-config.close()
-
-
-
-println("[5/6] Secure Boot")
-
-
-if secureBoot then
-
-    println("Calcul du hash...")
-
-
-    local hash = generateHash("/boot/nyxloader")
-
-
-    local file = fs.open("/boot/secureboot.hash", "w")
-    file.write(hash)
-    file.close()
-
-
-    println("Hash genere.")
-
-else
-
-    println("Secure Boot desactive.")
-
-end
-
-
-
-println("[6/6] Mode isolation")
-
-
-if isolationMode then
-
-    local isolation = dofile(
-        "/boot/nyxloader/lib/isolation.lua"
-    )
-
-    local stray = isolation.listStrayEntries()
-
-    if #stray == 0 then
-
-        println("Rien a deplacer.")
-
-    else
-
-        println(
-            #stray .. " element(s) a deplacer."
-        )
-        println(
-            "(Q pour annuler si aucun disque"
-        )
-        println(
-            "n'est disponible)"
-        )
-        println("")
-
-        isolation.enforce(println)
-
+local files = {}
+local function scan(path, rel)
+    for _, name in ipairs(fs.list(path)) do
+        local full = fs.combine(path, name)
+        local r = rel == "" and name or (rel .. "/" .. name)
+        if fs.isDir(full) then scan(full, r) else files[#files + 1] = r end
     end
-
-else
-
-    println("Mode isolation desactive.")
-
 end
+scan(source, "")
+table.sort(files)
 
+local args = { ... }
+local Setup = dofile(fs.combine(source, "lib/setup.lua"))
 
-
-println("")
-println("Installation terminee !")
-println("Redemarrage conseille.")
+Setup.run({
+    version = VERSION,
+    quiet = (args[1] == "--quiet"),
+    files = files,
+    fetch = function(rel)
+        local f = fs.open(fs.combine(source, rel), "rb")
+        if not f then return nil end
+        local data = f.readAll() f.close()
+        return data
+    end,
+})

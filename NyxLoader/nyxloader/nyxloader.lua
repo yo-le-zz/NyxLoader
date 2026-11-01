@@ -424,6 +424,8 @@ end
 
 -- Boucle NyxLoader
 
+local firstPass = true
+
 while true do
 
 
@@ -457,11 +459,58 @@ while true do
 
 
 
-    local selected =
-        ui.menu(
-            systems,
-            config
-        )
+    -- Un seul OS installe : on le demarre directement (l'OS a son
+    -- propre menu de boot). Une touche pendant 2 s ouvre ce menu.
+    local selected
+
+    if firstPass and config.autoSingle ~= false then
+
+        local real = {}
+
+        for _, sys in ipairs(systems) do
+            if sys.location ~= "internal" then
+                real[#real + 1] = sys
+            end
+        end
+
+        if #real == 1 then
+
+            term.clear()
+            term.setCursorPos(1, 1)
+            print("NyxLoader - " .. tostring(real[1].name))
+            print("")
+            print("Press any key for the boot menu...")
+
+            local timer = os.startTimer(2)
+            local skip = true
+
+            while true do
+                local ev, a = os.pullEvent()
+                if ev == "timer" and a == timer then
+                    skip = false
+                    break
+                elseif ev == "key" or ev == "mouse_click" then
+                    break
+                end
+            end
+
+            if not skip then
+                selected = real[1]
+            end
+
+        end
+
+    end
+
+    firstPass = false
+
+    if not selected then
+        selected =
+            ui.menu(
+                systems,
+                config
+            )
+    end
 
 
 

@@ -1,7 +1,7 @@
 -- NyxLoader web installer - ASCII only
 -- wget run https://raw.githubusercontent.com/yo-le-zz/NyxLoader/main/webinstall.lua
 
-local VERSION = "1.1.0"
+local VERSION = "1.1.1"
 local REPO = "https://raw.githubusercontent.com/yo-le-zz/NyxLoader/main/NyxLoader/nyxloader/"
 
 if not http then

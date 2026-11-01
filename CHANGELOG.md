@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.1
+- Only one OS installed: boots it directly ("Press any key for the boot menu", 2 s) instead of showing a second menu. `autoSingle = false` in /boot/config.lua restores the old behaviour.
+
 ## 1.1.0
 - New installer in the NyxOS style: splash, language menu (English, Francais, Espanol, Deutsch), option menus, progress bar.
 - ASCII-only text everywhere (accents were garbled in the CC:Tweaked terminal).

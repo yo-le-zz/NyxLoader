@@ -2,7 +2,7 @@
 -- Copie /boot/nyxloader depuis le dossier "nyxloader" a cote de ce
 -- fichier, puis redemarre automatiquement.
 
-local VERSION = "1.1.0"
+local VERSION = "1.1.1"
 
 local dir = fs.getDir(shell.getRunningProgram())
 local source = fs.combine(dir, "nyxloader")
